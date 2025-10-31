@@ -1,15 +1,33 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type JSX } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../axios";
+
+interface ExperienceType {
+  _id: string;
+  title: string;
+  description: string;
+  place: string;
+  price: number;
+  image: string;
+  about: string;
+}
+
+interface SlotType {
+  _id: string;
+  date: string;
+  time: string;
+  capacity: number;
+  remaining: number;
+}
 
 export default function Details() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [exp, setExp] = useState<any>(null);
+  const [exp, setExp] = useState<{ experience: ExperienceType; slots: SlotType[] } | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedDate, setSelectedDate] = useState<any>(null);
-  const [selectedSlot, setSelectedSlot] = useState<any>(null);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [selectedSlot, setSelectedSlot] = useState<SlotType | null>(null);
   const [quantity, setQuantity] = useState<number>(1);
 
   useEffect(() => {
@@ -23,14 +41,14 @@ export default function Details() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  if (loading) return <p className="text-center mt-10">Loading...</p>;
-  if (!exp) return <p className="text-center mt-10">Experience not found</p>;
+  if (loading) return <p className="mt-10 text-center">Loading...</p>;
+  if (!exp) return <p className="mt-10 text-center">Experience not found</p>;
 
   const { experience, slots } = exp;
 
-  const uniqueDates = [...new Set(slots.map((slot: any) => slot.date))];
-  const filteredSlots = selectedDate
-    ? slots.filter((slot: any) => slot.date === selectedDate)
+  const uniqueDates: string[] = [...new Set(slots.map((slot) => slot.date))];
+  const filteredSlots: SlotType[] = selectedDate
+    ? slots.filter((slot) => slot.date === selectedDate)
     : [];
 
   const tax = 59;
@@ -60,24 +78,23 @@ export default function Details() {
   };
 
   return (
-    <div className="min-h-screen bg-white px-4 md:px-12 py-8">
+    <div className="min-h-screen px-4 py-8 bg-white md:px-12">
       {/* 🔙 Back Arrow on Top */}
       <h2
-        className="text-xl font-semibold text-gray-800 mb-8 flex items-center gap-2 cursor-pointer"
+        className="flex items-center gap-2 mb-8 text-xl font-semibold text-gray-800 cursor-pointer"
         onClick={() => navigate(-1)}
       >
         <span className="text-2xl">←</span>
         <span>Back</span>
       </h2>
 
-      {/* Main Content Section */}
-      <div className="flex flex-col md:flex-row gap-8 max-w-6xl mx-auto">
+      <div className="flex flex-col max-w-6xl gap-8 mx-auto md:flex-row">
         {/* LEFT SECTION */}
-        <div className="md:w-2/3 w-full">
+        <div className="w-full md:w-2/3">
           <img
             src={experience.image}
             alt={experience.title}
-            className="w-full h-72 object-cover rounded-xl shadow-md"
+            className="object-cover w-full shadow-md h-72 rounded-xl"
           />
 
           <div className="mt-4 space-y-4">
@@ -86,11 +103,12 @@ export default function Details() {
 
             {/* Choose Date */}
             <div>
-              <h3 className="font-semibold mb-2">Choose date</h3>
+              <h3 className="mb-2 font-semibold">Choose date</h3>
               <div className="flex flex-wrap gap-2">
                 {uniqueDates.length > 0 ? (
-                  uniqueDates.map((date) => (
+                  uniqueDates.map((date: string): JSX.Element => (
                     <button
+                      key={date}
                       onClick={() => {
                         setSelectedDate(date);
                         setSelectedSlot(null);
@@ -105,7 +123,7 @@ export default function Details() {
                     </button>
                   ))
                 ) : (
-                  <p className="text-gray-500 text-sm">
+                  <p className="text-sm text-gray-500">
                     No dates available for booking.
                   </p>
                 )}
@@ -114,11 +132,11 @@ export default function Details() {
 
             {/* Choose Time */}
             <div>
-              <h3 className="font-semibold mb-2">Choose time</h3>
+              <h3 className="mb-2 font-semibold">Choose time</h3>
               {selectedDate ? (
                 <div className="flex flex-wrap gap-2">
                   {filteredSlots.length > 0 ? (
-                    filteredSlots.map((slot: any) => (
+                    filteredSlots.map((slot: SlotType): JSX.Element => (
                       <button
                         key={slot._id}
                         onClick={() => setSelectedSlot(slot)}
@@ -132,13 +150,13 @@ export default function Details() {
                       </button>
                     ))
                   ) : (
-                    <p className="text-gray-500 text-sm">
+                    <p className="text-sm text-gray-500">
                       No time slots for this date.
                     </p>
                   )}
                 </div>
               ) : (
-                <p className="text-gray-500 text-sm">
+                <p className="text-sm text-gray-500">
                   Please select a date first.
                 </p>
               )}
@@ -146,38 +164,37 @@ export default function Details() {
 
             {/* About Section */}
             <div>
-              <h3 className="font-semibold mt-4">About</h3>
-              <p className="text-gray-500 text-sm">
+              <h3 className="mt-4 font-semibold">About</h3>
+              <p className="text-sm text-gray-500">
                 {experience.about || "No additional details available."}
               </p>
             </div>
           </div>
         </div>
 
-        {/* RIGHT SECTION (Booking Summary) */}
+        {/* RIGHT SECTION */}
         <div className="sm:w-full md:w-1/3">
-          <div className="border rounded-xl shadow-md p-5 bg-gray-50 sticky top-6">
-            <h3 className="text-lg font-semibold mb-3">Booking Summary</h3>
+          <div className="sticky p-5 border shadow-md rounded-xl bg-gray-50 top-6">
+            <h3 className="mb-3 text-lg font-semibold">Booking Summary</h3>
 
             <div className="flex justify-between text-gray-700">
               <span>Starts at</span>
               <span>₹{experience.price}</span>
             </div>
 
-            {/* Quantity Control */}
             <div className="flex justify-between mt-2 text-gray-700">
               <span>Quantity</span>
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  className="border px-2 rounded hover:bg-gray-100"
+                  className="px-2 border rounded hover:bg-gray-100"
                 >
                   -
                 </button>
                 <span>{quantity}</span>
                 <button
                   onClick={() => setQuantity((q) => q + 1)}
-                  className="border px-2 rounded hover:bg-gray-100"
+                  className="px-2 border rounded hover:bg-gray-100"
                 >
                   +
                 </button>
@@ -194,15 +211,15 @@ export default function Details() {
               <span>₹{tax}</span>
             </div>
 
-            <div className="border-t my-3"></div>
+            <div className="my-3 border-t"></div>
 
-            <div className="flex justify-between font-bold text-lg">
+            <div className="flex justify-between text-lg font-bold">
               <span>Total</span>
               <span>₹{total}</span>
             </div>
 
             {!selectedDate || !selectedSlot ? (
-              <p className="text-center text-gray-500 text-sm mt-2">
+              <p className="mt-2 text-sm text-center text-gray-500">
                 Select a date and time to continue
               </p>
             ) : null}

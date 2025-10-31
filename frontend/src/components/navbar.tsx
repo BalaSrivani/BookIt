@@ -63,7 +63,7 @@ export default function Navbar({ onSearch }: { onSearch: (query: string) => void
       <div className="px-4 pb-3 sm:hidden">
         <form
           onSubmit={handleSubmit}
-          className="flex items-center bg-white-100 rounded-full pl-4 pr-1 py-1.5 w-full items-stretch gap-2"
+          className="flex  bg-white-100 rounded-full pl-4 pr-1 py-1.5 w-full items-stretch gap-2"
         >
           <input
             type="text"
