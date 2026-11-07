@@ -54,7 +54,7 @@ cd ../frontend
 npm install
 npm run dev
 ```
-Backend runs by default on  http://localhost:5173
+Frontend runs by default on  http://localhost:5173
 
 
 ### 💡 Features
